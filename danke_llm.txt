@@ -1,0 +1,25 @@
+#Why we create a view in SQL Query Compilation?
+
+Problem without a view:
+    If a user asks a question like:
+    "Show all customers from New York who made orders above 500"
+    The LLM has to figure out:
+    Which table to use? (customers and orders)
+    How to join them ? Customer.id = orders.customer_id
+    Which columns to select? (Customer.name, orders.amout)
+this is so, complitecated, espicalliy for real world db with many tables and foreign keys. The LLM could make 
+mistake to joins
+
+solution: 
+    We create a pre-joined view that already combines all the necessary tables:
+        CREATE VIEW V AS
+        SELECT *
+        FROM Customer
+        JOIN Orders ON Customer.id = Orders.customer_id;
+    Now , LLM does not need to worry about joins. It only writes simple SQL query over the V 
+
+
+Benefits: 
+    Simplifies LLM reasoning: LLM sees just one table (the view) instead of multiple tables.
+    Reduces errors in joins: No risk of wrong foreign key connections.
+    Works for complex schemas: Even if the database has 20–30 tables, the view only includes the relevant tables.

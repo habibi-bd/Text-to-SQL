@@ -1,0 +1,115 @@
+Schema Linking:
+    From a big database, find the smallest set of tables and columns needed to answer the user’s question
+
+
+
+Step-by-step
+
+## Keyword Extraction & Matching
+1. User gives a natural language question (QN)
+    Example : "Show customers from New York with orders above 500."
+2. LLM extracts keywords
+    Example:  customers, New York, orders, 500
+3. The keyword search system (DANKE) matches these words to:
+    tables, columns, values in databses
+    
+    Example: 
+    customers → Customer table
+    orders → Orders table
+    New York → Customer.city
+    500 → Orders.amount
+4. Output 
+    Matched keywords info (KM)
+
+
+
+
+## Dynamic Few-shot Examples Retrieval (DFE)
+    1. Take the same user question
+    2. Search the synthetic dataset to find similar past quesions 
+    3. Keep only the tables used in those SQL answers 
+
+    Example: 
+    Question: Customers from London with orders > 300
+    SQL uses tables: Customers, Orders 
+    Store .... T= [customers, orders]
+
+This helps guess which tables are needed.
+
+
+## Final Schema Linking Step
+
+Now combine everything:
+    Inputs:
+    User question (QN)
+    Matched keywords (KM)
+    Tables from similar examples (T)
+    Full database schema (S)
+
+    LLM thinks and chooses: 
+    S` = {customers , orders}
+
+    Output= (important tables)+ KM(keyword meanings)
+
+
+AT A GLANCE 
+
+User Question
+     ↓
+Extract keywords
+     ↓
+Match with database (KM)
+     ↓
+Find similar examples (DFE)
+     ↓
+Collect likely tables (T)
+     ↓
+LLM selects minimal schema (S′)
+
+
+@@ Without schema linking: LLM sees huge database → gets confused → wrong SQL
+@@ With schema linking : LLM sees only relevant tables → accurate SQL
+
+
+
+
+***********************************************************************************************************************************************
+
+SQL Query Compilation
+
+Step-by-step
+# View Synthesis (make one joined table)
+    Input → selected tables S′     # S` = {Customer, Order}
+    create virtual table that contains the correct JOIN 
+    Example view: V = Customer JOIN Orders ON Customer.id = Orders.customer_id
+# Question Decomposition (break big question)
+    Take the quesion QN: 
+    Example:
+        Show the customer from New York with orders above 500. 
+        split into sub quesions: (better example retrieval.)
+        Q1: customer from New York 
+        Q2: orders above 500
+# Dynamic Few-shot Example Retrieval (DFE again)
+    For each sub-question:
+    a. find similar examples from the synthetic dataset. (only using tables in S')
+    b. Collect top-k useful examples 
+    Results  L = list of best (quesion, SQL) examples
+    These exmaples teach the LLM how to write the SQL 
+# Final SQL compoilation (LLM writes SQL)
+    View V -> already joined table 
+    KM -> matched keywords
+    QN -> original quesion 
+    M - > sample rows from the view 
+    L ` -> similar example SQLs (rewritten to use V)
+
+Selected tables S′
+        ↓
+Create joined view V
+        ↓
+Break question into parts
+        ↓
+Retrieve similar examples
+        ↓
+Give V + examples + keywords to LLM
+        ↓
+LLM generates final SQL

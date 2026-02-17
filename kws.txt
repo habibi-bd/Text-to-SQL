@@ -1,0 +1,46 @@
+
+Goal: 
+Convert a natural language (NL) question into a working SQL query using LLMs, with help from a keyword search system (KwS) and schema linking.
+
+1. User Question (NL Input):
+“List all customers in the Sales department with pending orders.”
+
+2. Scehma linking (Identify which tables and columns in the database are relevant.)
+Identify which tables and columns in the database are relevant.
+
+    map terms: 
+    Map terms from the question to schema elements:
+    customers → Customer table  
+    Sales department → Department table
+
+    pending orders → Order.status column
+
+3.Knowledge-enhanced Search (KwS):
+
+    Retrieve extra information about the database:
+    Table relationships
+    Column descriptions or sample values
+
+Helps the LLM understand how to join tables correctly.
+
+
+4. LLM Integration:
+
+The LLM takes the NL question + schema links + extra context and reasons about how to write SQL.
+
+5. SQL Query Generation:
+    LLM produces a SQL query:
+    # inside code kws.py
+
+
+6. SQL Query Execution:
+
+    The SQL query is sent to the database engine.
+
+7. Result Retrieval:
+
+    The database returns the final data to the user.
+
+    Alice
+    Bob
+    Charlie
